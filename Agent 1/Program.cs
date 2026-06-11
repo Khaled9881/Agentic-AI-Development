@@ -13,24 +13,41 @@ var client = new PredictionServiceClientBuilder
 
 var endpoint = $"projects/{projectId}/locations/{location}/publishers/google/models/{model}";
 
-// ✅ Gemini requires GenerateContentAsync, NOT PredictAsync
-var request = new GenerateContentRequest
+
+while (true)
 {
-    Model = endpoint,
-    Contents =
+
+    string prompt = Console.ReadLine();
+    // ✅ Gemini requires GenerateContentAsync, NOT PredictAsync
+    var request = new GenerateContentRequest
     {
-        new Content
+        Model = endpoint,
+        SystemInstruction = new Content
         {
-            Role = "user",
             Parts =
             {
-                new Part { Text = "What is the largest city in France?" }
+                new Part { Text = "You are a helpful agent. Always respond concisely." }
+            }
+        },
+        Contents =
+        {
+            new Content
+            {
+                Role = "user",
+                Parts =
+                {
+                    new Part { Text = prompt }
+                }
             }
         }
-    }
-};
+    };
 
-var response = await client.GenerateContentAsync(request);
+    var response = await client.GenerateContentAsync(request);
 
-// Print the text from the first candidate
-Console.WriteLine(response.Candidates[0].Content.Parts[0].Text);
+    // Print the text from the first candidate
+    //Console.WriteLine(response);
+    Console.WriteLine(response.Candidates[0].Content.Parts[0].Text);
+
+}
+
+
